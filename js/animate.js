@@ -17,7 +17,7 @@ function getStyle(obj, attr){
 		return getComputedStyle(obj, null)[attr];
 	}
 }
-function animate(obj, json, time, callback){
+function animate(obj, json, callback){
 	clearInterval(obj.timer);
 	obj.timer = setInterval(function(){
 		var isStop = true;
@@ -28,7 +28,7 @@ function animate(obj, json, time, callback){
 			}else{
 				now = parseInt(getStyle(obj, attr));
 			}
-			var speed = (json[attr] - now) / time;
+			var speed = (json[attr] - now) / 8;
 			speed = speed>0 ? Math.ceil(speed) : Math.floor(speed);
 			var cur = now + speed;
 			if(attr == 'opacity'){
@@ -46,11 +46,24 @@ function animate(obj, json, time, callback){
 		}
 	}, 30)
 }
+function animateNote(obj, json, callback){
+	for(var attr in json){
+		var timer = setInterval(function(){
+			var now = parseInt(getStyle(obj, attr));
+			now--;
+			obj.style[attr] = now + "px";
+			if(now == json[attr]){
+				callback();
+			}
+			clearInterval(timer);
+		}, 30);
+	}
+}
 
 function sliding(){
-		animate(notes, {marginLeft:-350}, 500, function(){
+		animateNote(notes, {marginLeft:-350}, function(){
 			notes.style.marginLeft = "1000px";
-		});
+		});	
 }
 function navChange(){
 	for(var i = 0; i < oNavlist.length; ++i){
@@ -69,7 +82,7 @@ function next(){
 		isMoving = true;
 		index++;
 		navChange();
-		animate(slider, {left:-1200 * index}, 8, function(){
+		animate(slider, {left:-1200 * index}, function(){
 			if(index > imgnum){
 				slider.style.left = "-1200px";
 				index = 1;
@@ -83,7 +96,7 @@ function prev(){
 		isMoving = true;
 		index--;
 		navChange();
-		animate(slider, {left:-1200 * index}, 8, function(){
+		animate(slider, {left:-1200 * index}, function(){
 			if(index == 0){
 				slider.style.left = "-6000px";
 				index = imgnum;
@@ -94,19 +107,19 @@ function prev(){
 }
 
 //滚动字幕
-noteTimer = setInterval(sliding, 200);
+noteTimer = setInterval(sliding, 15);
 //图片自动轮播
 imgTimer = setInterval(next, 3000);
 //鼠标上滑
 box.onmouseover = function(){
-	animate(left, {opacity:50}, 8);
-	animate(right, {opacity:50}, 8);
+	animate(left, {opacity:50});
+	animate(right, {opacity:50});
 	clearInterval(imgTimer);
 }
 //鼠标移开
 box.onmouseout = function(){
-	animate(left, {opacity:0}, 8);
-	animate(right, {opacity:0}, 8);
+	animate(left, {opacity:0});
+	animate(right, {opacity:0});
 	imgTimer = setInterval(next, 3000);
 }
 //左右切换按钮
@@ -118,6 +131,6 @@ for(var i = 0; i < oNavlist.length; ++i){
 	oNavlist[i].onclick = function(){
 		index = this.j + 1;
 		navChange();
-		animate(slider, {left:-1200 * index}, 8);
+		animate(slider, {left:-1200 * index});
 	}
 }
